@@ -11,7 +11,7 @@ function formatCount(n) {
 exports.handler = async function (event) {
   const limit = event.queryStringParameters?.limit || 2;
   try {
-    const res = await fetch(`https://huggingface.co/api/models?sort=trending&direction=-1&limit=${limit}`);
+    const res = await fetch(`https://huggingface.co/api/models?sort=trendingScore&direction=-1&limit=${limit}`);
     if (!res.ok) throw new Error(`Hugging Face API returned ${res.status}`);
     const data = await res.json();
     const mapped = data.map((m) => ({
