@@ -192,16 +192,6 @@ body{
   border-top: 1px solid var(--line);
 }
 
-.notice{
-  margin-top: 30px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  font-size: 12.5px;
-  color: var(--text-dim);
-  line-height: 1.6;
-}
-.notice b{ color: var(--text); }
-
 @media (max-width: 720px){
   .stocks-table th:nth-child(4), .stocks-table th:nth-child(5), .stocks-table th:nth-child(6),
   .stocks-table td:nth-child(4), .stocks-table td:nth-child(5), .stocks-table td:nth-child(6){ display:none; }
@@ -481,19 +471,7 @@ function render(){
     }
   }
 
-  html += `<div class="notice"><b>Data status.</b> ${liveStatusNote()}</div>`;
-
   document.getElementById('main').innerHTML = html;
-}
-
-function liveStatusNote(){
-  const modelsNote = liveStatus.models === 'live' ? 'live from Hugging Face'
-    : liveStatus.models === 'fallback' ? 'sample data (the Netlify function proxy isn\'t reachable here — this needs to run on Netlify itself)'
-    : 'loading…';
-  const papersNote = liveStatus.papers === 'live' ? 'live from arXiv'
-    : liveStatus.papers === 'fallback' ? 'sample data (the Netlify function proxy isn\'t reachable here — this needs to run on Netlify itself)'
-    : 'loading…';
-  return `Today's Models are ${modelsNote}. Today's Papers are ${papersNote}. News, Stocks, and GitHub still need their own API-key-backed proxy functions, so they remain sample data everywhere.`;
 }
 
 function toggleSave(id){
