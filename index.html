@@ -523,6 +523,19 @@ document.getElementById('nextCat').addEventListener('click', () => {
   render();
 });
 
+const REFRESH_INTERVAL_MS = 3 * 60 * 60 * 1000; // re-poll live data every 3 hours
+let lastLiveFetch = 0;
+
+async function refreshLiveData(){
+  try{
+    await loadLiveData();
+  } catch(e){
+    console.error('Live data refresh failed unexpectedly:', e);
+  } finally {
+    lastLiveFetch = Date.now();
+  }
+}
+
 async function init(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -533,12 +546,16 @@ async function init(){
     // no saved items yet — that's fine
   }
   render(); // paint immediately with sample data
-  try{
-    await loadLiveData(); // then upgrade today's Models/Papers to live data if reachable
-  } catch(e){
-    console.error('Live data load failed unexpectedly:', e);
-    render();
-  }
+  await refreshLiveData(); // then upgrade today's Models/Papers to live data if reachable
+
+  setInterval(refreshLiveData, REFRESH_INTERVAL_MS);
+
+  // catch up right away if the tab was backgrounded/asleep past the interval
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible' && Date.now() - lastLiveFetch > REFRESH_INTERVAL_MS){
+      refreshLiveData();
+    }
+  });
 }
 
 init();
