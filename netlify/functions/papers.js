@@ -12,7 +12,17 @@ exports.handler = async function (event) {
   const limit = event.queryStringParameters?.limit || 1;
   try {
     const url = `https://export.arxiv.org/api/query?search_query=cat:cs.LG&sortBy=submittedDate&sortOrder=descending&max_results=${limit}`;
-    const res = await fetch(url);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    let res;
+    try {
+      res = await fetch(url, {
+        signal: controller.signal,
+        headers: { 'User-Agent': 'SignalSheetDemo/1.0 (portfolio project; contact: none)' },
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
     if (!res.ok) throw new Error(`arXiv API returned ${res.status}`);
     const text = await res.text();
 
@@ -22,11 +32,13 @@ exports.handler = async function (event) {
     const mapped = entryChunks.map((chunk) => {
       const title = extractTag(chunk, 'title');
       const summary = extractTag(chunk, 'summary');
+      const id = extractTag(chunk, 'id'); // e.g. http://arxiv.org/abs/2501.12345v1
       return {
         cat: 'Papers',
         time: 'live',
         headline: title,
         sub: summary.length > 150 ? summary.slice(0, 150) + '…' : summary,
+        url: id || undefined,
       };
     });
 
@@ -36,10 +48,11 @@ exports.handler = async function (event) {
       body: JSON.stringify(mapped),
     };
   } catch (err) {
+    const message = err.name === 'AbortError' ? 'arXiv did not respond within 8 seconds' : err.message;
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: err.message }),
+      body: JSON.stringify({ error: message }),
     };
   }
 };

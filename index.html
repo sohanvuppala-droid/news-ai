@@ -148,6 +148,13 @@ body{
   color: var(--text);
   line-height: 1.4;
 }
+.feed-row .headline a{
+  color: var(--text);
+  text-decoration: none;
+}
+.feed-row .headline a:hover{
+  text-decoration: underline;
+}
 .feed-row .headline .sub{
   display:block;
   color: var(--text-dim);
@@ -235,16 +242,16 @@ const STOCKS = {
 const FEED = {
   "Sept 14": [
     { cat: "News", time: "9:10am", headline: "Gemma 4 downloads cross 8.5M as uncensored community fine-tunes spread" },
-    { cat: "Models", time: "8:42am", headline: "Qwen/Qwen3.8-27B", sub: "Image-Text-to-Text · 28B · 6.02M downloads" },
+    { cat: "Models", time: "8:42am", headline: "Qwen/Qwen3.8-27B", sub: "Image-Text-to-Text · 28B · 6.02M downloads", url: "https://huggingface.co/Qwen/Qwen3.8-27B" },
     { cat: "Papers", time: "7:55am", headline: "Compile by Training: NL Specs into Local Neural Functions", sub: "Trains a small adapter to reproduce a function without a runtime LLM call" },
-    { cat: "GitHub", time: "6:20am", headline: "vllm-project/vllm", sub: "inference serving", extra: "+450 ★" },
-    { cat: "Models", time: "6:05am", headline: "deepseek-ai/DeepSeek-V4-Flash-Vision-Exp", sub: "Image-Text-to-Text · 305B", extra: "185k ↓" },
+    { cat: "GitHub", time: "6:20am", headline: "vllm-project/vllm", sub: "inference serving", extra: "+450 ★", url: "https://github.com/vllm-project/vllm" },
+    { cat: "Models", time: "6:05am", headline: "deepseek-ai/DeepSeek-V4-Flash-Vision-Exp", sub: "Image-Text-to-Text · 305B", extra: "185k ↓", url: "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-Vision-Exp" },
   ],
   "Sept 13": [
     { cat: "News", time: "4:30pm", headline: "Chinese open-weight labs now hold half of HF's top ten trending slots" },
-    { cat: "Models", time: "2:15pm", headline: "google/timesfm-3.0-pytorch", sub: "Time Series Forecasting · 0.3B", extra: "123k ↓" },
+    { cat: "Models", time: "2:15pm", headline: "google/timesfm-3.0-pytorch", sub: "Time Series Forecasting · 0.3B", extra: "123k ↓", url: "https://huggingface.co/google/timesfm-3.0-pytorch" },
     { cat: "Papers", time: "11:40am", headline: "Terminal-Universe: Agent Trajectories as Scalable Environments", sub: "Converts recorded agent sessions into reusable training and eval environments" },
-    { cat: "GitHub", time: "9:05am", headline: "ollama/ollama", sub: "local model runner", extra: "+610 ★" },
+    { cat: "GitHub", time: "9:05am", headline: "ollama/ollama", sub: "local model runner", extra: "+610 ★", url: "https://github.com/ollama/ollama" },
   ],
 };
 
@@ -393,7 +400,7 @@ function renderFeed(items, opts={}){
     <div class="feed-row">
       <div class="cat">${it.cat}</div>
       <div class="time">${timeCell}</div>
-      <div class="headline">${it.headline}${it.sub ? `<span class="sub">${it.sub}</span>` : ''}</div>
+      <div class="headline">${it.url ? `<a href="${it.url}" target="_blank" rel="noopener noreferrer">${it.headline}</a>` : it.headline}${it.sub ? `<span class="sub">${it.sub}</span>` : ''}</div>
       <div class="extra">${it.extra||''}</div>
       <button class="save-btn ${saved?'saved':''}" data-id="${it.id}" title="${saved?'Remove from Saved':'Save'}">${bookmarkIcon(saved)}</button>
     </div>`;

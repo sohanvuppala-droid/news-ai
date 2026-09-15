@@ -20,6 +20,7 @@ exports.handler = async function (event) {
       headline: m.id || m.modelId,
       sub: [m.pipeline_tag, m.likes != null ? `${m.likes} likes` : null].filter(Boolean).join(' · '),
       extra: m.downloads != null ? `${formatCount(m.downloads)} ↓` : '',
+      url: `https://huggingface.co/${m.id || m.modelId}`,
     }));
     return {
       statusCode: 200,
