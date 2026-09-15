@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NewsAI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --bg: #FAFAF9;
+  --line: #D8D6D1;
+  --line-strong: #B9B6AF;
+  --text: #1A1A18;
+  --text-dim: #706E68;
+  --text-faint: #A8A59D;
+  --up: #4C7A52;
+  --down: #B5493C;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, 'Helvetica Neue', sans-serif;
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ---- Top nav ---- */
+.topnav{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--line-strong);
+}
+.wordmark{
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+.nav-center{
+  display:flex;
+  align-items:center;
+  gap: 18px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.nav-center .arrow{
+  cursor:pointer;
+  color: var(--text-faint);
+  font-size: 15px;
+  user-select:none;
+}
+.nav-center .arrow:hover{ color: var(--text); }
+.nav-center .current{
+  font-style: italic;
+  font-family: Georgia, serif;
+  color: var(--text);
+}
+.nav-right{
+  display:flex;
+  gap: 22px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+.nav-right span{ cursor:pointer; }
+.nav-right span:hover{ color: var(--text); }
+.nav-right span.active{ color: var(--text); }
+
+/* ---- Main ---- */
+.main{ max-width: 1280px; margin: 0 auto; padding: 0 28px 60px; }
+
+.date-block{ padding-top: 34px; }
+.date-heading{
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+
+.section-label{
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+/* ---- Stocks table ---- */
+.stocks-table{
+  border: 1px solid var(--line-strong);
+  margin-bottom: 30px;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.stocks-table col.col-name{ width: 22%; }
+.stocks-table col.col-num{ width: 14%; }
+.stocks-table col.col-chart{ width: 16%; }
+.stocks-table th{
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-dim);
+  padding: 9px 14px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line-strong);
+  text-align: left;
+}
+.stocks-table th:last-child, .stocks-table td:last-child{ border-right:none; }
+.stocks-table th.num, .stocks-table td.num{ text-align: right; }
+.stocks-table th.chart-col, .stocks-table td.chart-col{ text-align: center; }
+.stocks-table td{
+  padding: 11px 14px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
+.stocks-table tr:last-child td{ border-bottom:none; }
+.tk-name{ font-weight: 500; }
+.tk-sym{ color: var(--text-faint); margin-left: 6px; font-size: 12px; }
+.delta.up{ color: var(--up); }
+.delta.down{ color: var(--down); }
+.chart-cell svg{ display:block; margin: 0 auto; }
+
+/* ---- Feed ---- */
+.feed{ border-top: 1px solid var(--line); }
+.feed-row{
+  display:grid;
+  grid-template-columns: 90px 90px 1fr 80px 30px;
+  gap: 14px;
+  padding: 13px 4px;
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+}
+.feed-row .cat{
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+.feed-row .time{
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+.feed-row .headline{
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.4;
+}
+.feed-row .headline .sub{
+  display:block;
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.feed-row .extra{
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align:right;
+}
+.save-btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding: 2px;
+  color: var(--text-faint);
+  align-self: center;
+  display:flex;
+}
+.save-btn:hover{ color: var(--text); }
+.save-btn.saved{ color: var(--text); }
+.save-btn svg{ width:15px; height:15px; display:block; }
+
+.empty-note{
+  padding: 30px 4px;
+  color: var(--text-faint);
+  font-size: 13.5px;
+  border-top: 1px solid var(--line);
+}
+
+.notice{
+  margin-top: 30px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.notice b{ color: var(--text); }
+
+@media (max-width: 720px){
+  .stocks-table th:nth-child(4), .stocks-table th:nth-child(5), .stocks-table th:nth-child(6),
+  .stocks-table td:nth-child(4), .stocks-table td:nth-child(5), .stocks-table td:nth-child(6){ display:none; }
+  .feed-row{ grid-template-columns: 70px 1fr 30px; }
+  .feed-row .time, .feed-row .extra{ display:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <div class="wordmark">NewsAI</div>
+  <div class="nav-center">
+    <span class="arrow" id="prevCat">&lt;</span>
+    <span class="current" id="currentCat">All</span>
+    <span class="arrow" id="nextCat">&gt;</span>
+  </div>
+  <div class="nav-right">
+    <span class="active" id="navHome">Home</span>
+    <span id="navSaved">Saved</span>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+
+<script>
+const STOCKS = {
+  "Sept 14": [
+    { name: "NVIDIA", sym: "NVDA", price: "187.42", since: 3.2, avg: "178.10", pe: "41.2" },
+    { name: "Microsoft", sym: "MSFT", price: "521.10", since: 0.8, avg: "512.44", pe: "35.6" },
+    { name: "Alphabet", sym: "GOOGL", price: "203.55", since: -1.1, avg: "207.90", pe: "24.8" },
+    { name: "Meta Platforms", sym: "META", price: "742.30", since: 2.4, avg: "718.05", pe: "27.3" },
+    { name: "AMD", sym: "AMD", price: "198.77", since: 1.6, avg: "190.22", pe: "48.9" },
+  ],
+  "Sept 13": [
+    { name: "NVIDIA", sym: "NVDA", price: "181.60", since: 1.1, avg: "177.85", pe: "39.9" },
+    { name: "Microsoft", sym: "MSFT", price: "516.90", since: -0.3, avg: "510.02", pe: "35.2" },
+    { name: "Alphabet", sym: "GOOGL", price: "205.85", since: 0.6, avg: "207.40", pe: "25.1" },
+    { name: "Meta Platforms", sym: "META", price: "724.80", since: -0.9, avg: "715.30", pe: "26.7" },
+    { name: "AMD", sym: "AMD", price: "195.40", since: 0.9, avg: "188.60", pe: "48.1" },
+  ],
+};
+
+const FEED = {
+  "Sept 14": [
+    { cat: "News", time: "9:10am", headline: "Gemma 4 downloads cross 8.5M as uncensored community fine-tunes spread" },
+    { cat: "Models", time: "8:42am", headline: "Qwen/Qwen3.8-27B", sub: "Image-Text-to-Text · 28B · 6.02M downloads" },
+    { cat: "Papers", time: "7:55am", headline: "Compile by Training: NL Specs into Local Neural Functions", sub: "Trains a small adapter to reproduce a function without a runtime LLM call" },
+    { cat: "GitHub", time: "6:20am", headline: "vllm-project/vllm", sub: "inference serving", extra: "+450 ★" },
+    { cat: "Models", time: "6:05am", headline: "deepseek-ai/DeepSeek-V4-Flash-Vision-Exp", sub: "Image-Text-to-Text · 305B", extra: "185k ↓" },
+  ],
+  "Sept 13": [
+    { cat: "News", time: "4:30pm", headline: "Chinese open-weight labs now hold half of HF's top ten trending slots" },
+    { cat: "Models", time: "2:15pm", headline: "google/timesfm-3.0-pytorch", sub: "Time Series Forecasting · 0.3B", extra: "123k ↓" },
+    { cat: "Papers", time: "11:40am", headline: "Terminal-Universe: Agent Trajectories as Scalable Environments", sub: "Converts recorded agent sessions into reusable training and eval environments" },
+    { cat: "GitHub", time: "9:05am", headline: "ollama/ollama", sub: "local model runner", extra: "+610 ★" },
+  ],
+};
+
+const CATEGORIES = ['All', 'News', 'Stocks', 'Models', 'Papers', 'GitHub'];
+let filterIndex = 0;
+let view = 'home'; // 'home' | 'saved'
+let savedIds = new Set();
+const STORAGE_KEY = 'saved-feed-items';
+let liveStatus = { models: 'pending', papers: 'pending' };
+
+function smoothPath(points){
+  // Catmull-Rom to cubic Bezier, for a rounded/organic line instead of sharp angles
+  if(points.length < 3) return `M ${points.map(p=>`${p.x} ${p.y}`).join(' L ')}`;
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for(let i=0;i<points.length-1;i++){
+    const p0 = points[i-1] || points[i];
+    const p1 = points[i];
+    const p2 = points[i+1];
+    const p3 = points[i+2] || p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+
+function sparkline(seed){
+  // gentle rise-to-a-peak-then-settle shape, varied per seed, rendered as a smooth curve
+  const n = 9;
+  const pts = [];
+  let v = 40;
+  for(let i=0;i<n;i++){
+    const bias = Math.sin((i/(n-1)) * Math.PI) * 14; // rise then fall envelope
+    v += (Math.sin(i*seed*1.3 + seed) * 5);
+    pts.push(v + bias);
+  }
+  const min = Math.min(...pts), max = Math.max(...pts);
+  const points = pts.map((p,i) => ({
+    x: i * (100/(n-1)),
+    y: 26 - ((p-min)/(max-min||1)) * 20,
+  }));
+  const up = points[points.length-1].y < points[0].y;
+  const path = smoothPath(points);
+  return `<svg viewBox="0 0 100 28" width="90" height="28"><path d="${path}" fill="none" stroke="${up?'#4C7A52':'#B5493C'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function renderStocksTable(rows, showPE){
+  const colgroup = `<colgroup>
+    <col class="col-name"><col class="col-num"><col class="col-num"><col class="col-num"><col class="col-num"><col class="col-chart">
+  </colgroup>`;
+  const head = `<thead><tr>
+    <th>Name</th><th class="num">Current Price</th><th class="num">Since Yesterday</th><th class="num">Monthly Average</th>
+    <th class="num">${showPE?'P/E Ratio':''}</th><th class="chart-col">${showPE?'Chart':''}</th>
+  </tr></thead>`;
+  const body = rows.map((r,i)=>{
+    const up = r.since >= 0;
+    return `<tr>
+      <td><span class="tk-name">${r.name}</span><span class="tk-sym">${r.sym}</span></td>
+      <td class="num">$${r.price}</td>
+      <td class="num delta ${up?'up':'down'}">${up?'+':''}${r.since}%</td>
+      <td class="num">$${r.avg}</td>
+      <td class="num">${showPE ? r.pe : ''}</td>
+      <td class="chart-col chart-cell">${showPE ? sparkline(i+1) : ''}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="stocks-table">${colgroup}${head}<tbody>${body}</tbody></table>`;
+}
+
+function formatCount(n){
+  if(n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+  if(n >= 1e3) return (n/1e3).toFixed(1) + 'k';
+  return String(n);
+}
+
+async function fetchTrendingModels(n){
+  const res = await fetch(`/.netlify/functions/models?limit=${n}`);
+  if(!res.ok) throw new Error('Models proxy failed: ' + res.status);
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  return data;
+}
+
+async function fetchTrendingPapers(n){
+  const res = await fetch(`/.netlify/functions/papers?limit=${n}`);
+  if(!res.ok) throw new Error('Papers proxy failed: ' + res.status);
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  return data;
+}
+
+async function loadLiveData(){
+  const todayKey = Object.keys(FEED)[0]; // "Sept 14" — today's section
+  const existing = FEED[todayKey];
+  const nonModelsPapers = existing.filter(it => it.cat !== 'Models' && it.cat !== 'Papers');
+  const modelCount = existing.filter(it => it.cat === 'Models').length || 2;
+  const paperCount = existing.filter(it => it.cat === 'Papers').length || 1;
+
+  const [modelsResult, papersResult] = await Promise.allSettled([
+    fetchTrendingModels(modelCount),
+    fetchTrendingPapers(paperCount),
+  ]);
+
+  let liveModels = [], livePapers = [];
+
+  if(modelsResult.status === 'fulfilled'){
+    liveModels = modelsResult.value;
+    liveStatus.models = 'live';
+  } else {
+    liveModels = existing.filter(it => it.cat === 'Models');
+    liveStatus.models = 'fallback';
+    console.warn('Live model fetch failed, using sample data:', modelsResult.reason);
+  }
+
+  if(papersResult.status === 'fulfilled'){
+    livePapers = papersResult.value;
+    liveStatus.papers = 'live';
+  } else {
+    livePapers = existing.filter(it => it.cat === 'Papers');
+    liveStatus.papers = 'fallback';
+    console.warn('Live paper fetch failed, using sample data:', papersResult.reason);
+  }
+
+  FEED[todayKey] = [...nonModelsPapers, ...liveModels, ...livePapers];
+  render();
+}
+
+function bookmarkIcon(saved){
+  return `<svg viewBox="0 0 20 20" fill="${saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.4">
+    <path d="M5 3.5h10a.5.5 0 0 1 .5.5v14l-5.5-3.6L4.5 18V4a.5.5 0 0 1 .5-.5z" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function slugId(dateKey, item){
+  const slug = (item.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40);
+  return `${dateKey}::${item.cat}::${slug}`;
+}
+
+function renderFeed(items, opts={}){
+  const showDate = !!opts.showDate;
+  return `<div class="feed">${items.map(it => {
+    const saved = savedIds.has(it.id);
+    const timeCell = showDate ? `${it.dateLabel} · ${it.time}` : it.time;
+    return `
+    <div class="feed-row">
+      <div class="cat">${it.cat}</div>
+      <div class="time">${timeCell}</div>
+      <div class="headline">${it.headline}${it.sub ? `<span class="sub">${it.sub}</span>` : ''}</div>
+      <div class="extra">${it.extra||''}</div>
+      <button class="save-btn ${saved?'saved':''}" data-id="${it.id}" title="${saved?'Remove from Saved':'Save'}">${bookmarkIcon(saved)}</button>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function allFeedItemsFlat(){
+  const dates = Object.keys(FEED);
+  const flat = [];
+  dates.forEach(d => {
+    const dateLabel = d === Object.keys(STOCKS)[0] ? 'Sept 14' : 'Sept 13';
+    FEED[d].forEach((it, i) => {
+      flat.push({ ...it, id: slugId(d, it), dateLabel });
+    });
+  });
+  return flat;
+}
+
+function render(){
+  const filter = CATEGORIES[filterIndex];
+  document.getElementById('currentCat').textContent = filter;
+  document.getElementById('navHome').classList.toggle('active', view === 'home');
+  document.getElementById('navSaved').classList.toggle('active', view === 'saved');
+
+  let html = '';
+
+  if(view === 'saved'){
+    let items = allFeedItemsFlat().filter(it => savedIds.has(it.id));
+    if(filter !== 'All' && filter !== 'Stocks'){
+      items = items.filter(it => it.cat === filter);
+    }
+    if(filter === 'Stocks'){
+      items = [];
+    }
+    html += `<div class="date-block"><div class="section-label">Saved</div>`;
+    if(items.length){
+      html += renderFeed(items, { showDate: true });
+    } else {
+      html += `<div class="empty-note">Nothing saved yet. Tap the bookmark icon on any feed item to keep it here.</div>`;
+    }
+    html += `</div>`;
+  } else {
+    const dates = Object.keys(STOCKS);
+    dates.forEach((d) => {
+      const dateLabel = d === dates[0] ? 'September 14th' : 'September 13th';
+      let block = `<div class="date-block"><div class="date-heading">${dateLabel}</div>`;
+      let hasContent = false;
+
+      if(filter === 'All' || filter === 'Stocks'){
+        block += `<div class="section-label">Stocks</div>${renderStocksTable(STOCKS[d], true)}`;
+        hasContent = true;
+      }
+      if(filter !== 'Stocks'){
+        const rawItems = filter === 'All' ? FEED[d] : FEED[d].filter(it => it.cat === filter);
+        const items = rawItems.map((it) => ({ ...it, id: slugId(d, it) }));
+        if(items.length){
+          block += `<div class="section-label">Feed</div>${renderFeed(items)}`;
+          hasContent = true;
+        }
+      }
+      block += `</div>`;
+      if(hasContent) html += block;
+    });
+
+    if(!html){
+      html = `<div class="date-block"><div class="section-label">No ${filter.toLowerCase()} updates in this range.</div></div>`;
+    }
+  }
+
+  html += `<div class="notice"><b>Data status.</b> ${liveStatusNote()}</div>`;
+
+  document.getElementById('main').innerHTML = html;
+}
+
+function liveStatusNote(){
+  const modelsNote = liveStatus.models === 'live' ? 'live from Hugging Face'
+    : liveStatus.models === 'fallback' ? 'sample data (the Netlify function proxy isn\'t reachable here — this needs to run on Netlify itself)'
+    : 'loading…';
+  const papersNote = liveStatus.papers === 'live' ? 'live from arXiv'
+    : liveStatus.papers === 'fallback' ? 'sample data (the Netlify function proxy isn\'t reachable here — this needs to run on Netlify itself)'
+    : 'loading…';
+  return `Today's Models are ${modelsNote}. Today's Papers are ${papersNote}. News, Stocks, and GitHub still need their own API-key-backed proxy functions, so they remain sample data everywhere.`;
+}
+
+async function toggleSave(id){
+  if(savedIds.has(id)) savedIds.delete(id); else savedIds.add(id);
+  render();
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify([...savedIds]), false);
+  } catch(e){
+    console.error('Could not persist saved items', e);
+  }
+}
+
+document.getElementById('main').addEventListener('click', (e) => {
+  const btn = e.target.closest('.save-btn');
+  if(btn) toggleSave(btn.dataset.id);
+});
+
+document.getElementById('navHome').addEventListener('click', () => { view = 'home'; render(); });
+document.getElementById('navSaved').addEventListener('click', () => { view = 'saved'; render(); });
+
+document.getElementById('prevCat').addEventListener('click', () => {
+  filterIndex = (filterIndex - 1 + CATEGORIES.length) % CATEGORIES.length;
+  render();
+});
+document.getElementById('nextCat').addEventListener('click', () => {
+  filterIndex = (filterIndex + 1) % CATEGORIES.length;
+  render();
+});
+
+async function init(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if(res && res.value){
+      const arr = JSON.parse(res.value);
+      savedIds = new Set(arr);
+    }
+  } catch(e){
+    // no saved items yet — that's fine
+  }
+  render(); // paint immediately with sample data
+  try{
+    await loadLiveData(); // then upgrade today's Models/Papers to live data if reachable
+  } catch(e){
+    console.error('Live data load failed unexpectedly:', e);
+    render();
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
